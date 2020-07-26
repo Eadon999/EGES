@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 from itertools import chain
@@ -17,7 +16,9 @@ def cnt_session(data, time_cut=30, cut_type=2):
     session = []
     tmp_session = []
     for i, item in enumerate(sku_list):
-        if type_list[i] == cut_type or (i < len(sku_list)-1 and (time_list[i+1] - time_list[i]).seconds/60 > time_cut) or i == len(sku_list)-1:
+        if type_list[i] == cut_type or (
+                i < len(sku_list) - 1 and (time_list[i + 1] - time_list[i]).seconds / 60 > time_cut) or i == len(
+            sku_list) - 1:
             tmp_session.append(item)
             session.append(tmp_session)
             tmp_session = []
@@ -48,14 +49,17 @@ def get_graph_context_all_pairs(walks, window_size):
     return np.array(all_pairs, dtype=np.int32)
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='manual to this script')
     parser.add_argument("--data_path", type=str, default='./data/')
-    parser.add_argument("--p", type=float, default=0.25)
-    parser.add_argument("--q", type=float, default=2)
-    parser.add_argument("--num_walks", type=int, default=10)
-    parser.add_argument("--walk_length", type=int, default=10)
+    # parser.add_argument("--p", type=float, default=0.25)
+    # parser.add_argument("--q", type=float, default=2)
+    parser.add_argument("--p", type=float, default=1)
+    parser.add_argument("--q", type=float, default=1)
+    # parser.add_argument("--num_walks", type=int, default=10)
+    # parser.add_argument("--walk_length", type=int, default=10)
+    parser.add_argument("--num_walks", type=int, default=2)
+    parser.add_argument("--walk_length", type=int, default=5)
     parser.add_argument("--window_size", type=int, default=5)
     args = parser.parse_known_args()[0]
 
@@ -69,7 +73,8 @@ if __name__ == '__main__':
 
     print('make session list\n')
     start_time = time.time()
-    session_list = get_session(action_data, use_type=[1, 2, 3, 5])
+    session_list = get_session(action_data, use_type=[1, 2, 3, 5])  # 按照时间划分session
+
     session_list_all = []
     for item_list in session_list:
         for session in item_list:

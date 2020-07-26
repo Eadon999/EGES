@@ -1,4 +1,3 @@
-
 import numpy as np
 import tensorflow as tf
 
@@ -23,8 +22,10 @@ class EGES_Model:
 
     def embedding_init(self):
         cat_embedding_vars = []
+        # 每一个sku（第一列是sku即序列node）和每一个side info feature 生成一个 (feature_len,embedding_dim)的矩阵
         for i in range(self.num_feat):
-            embedding_var = tf.Variable(tf.random_uniform((self.feature_lens[i], self.embedding_dim), -1, 1), name='embedding'+str(i),
+            embedding_var = tf.Variable(tf.random_uniform((self.feature_lens[i], self.embedding_dim), -1, 1),
+                                        name='embedding' + str(i),
                                         trainable=True)
             cat_embedding_vars.append(embedding_var)
         return cat_embedding_vars
@@ -46,7 +47,7 @@ class EGES_Model:
     def input_init(self):
         input_list = []
         for i in range(self.num_feat):
-            input_col = tf.placeholder(tf.int32, [None], name='inputs_'+str(i))
+            input_col = tf.placeholder(tf.int32, [None], name='inputs_' + str(i))
             input_list.append(input_col)
         input_list.append(tf.placeholder(tf.int32, shape=[None, 1], name='label'))
         return input_list

@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 import tensorflow as tf
@@ -6,7 +5,6 @@ import time
 import argparse
 from EGES_model import EGES_Model
 from utils import *
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='manual to this script')
@@ -25,14 +23,18 @@ if __name__ == '__main__':
     start_time = time.time()
     side_info = np.loadtxt(args.root_path + 'sku_side_info.csv', dtype=np.int32, delimiter='\t')
     all_pairs = np.loadtxt(args.root_path + 'all_pairs', dtype=np.int32, delimiter=' ')
+
+    # 计算side_info每个特征的维度
     feature_lens = []
     for i in range(side_info.shape[1]):
         tmp_len = len(set(side_info[:, i]))
         feature_lens.append(tmp_len)
+
     end_time = time.time()
     print('time consumed for read features: %.2f' % (end_time - start_time))
 
-    EGES = EGES_Model(len(side_info), args.num_feat, feature_lens, n_sampled=args.n_sampled, embedding_dim=args.embedding_dim,
+    EGES = EGES_Model(len(side_info), args.num_feat, feature_lens, n_sampled=args.n_sampled,
+                      embedding_dim=args.embedding_dim,
                       lr=args.lr)
 
     # init model
@@ -51,7 +53,7 @@ if __name__ == '__main__':
     iteration = 0
     start = time.time()
 
-    max_iter = len(all_pairs)//args.batch_size*args.epochs
+    max_iter = len(all_pairs) // args.batch_size * args.epochs
     for iter in range(max_iter):
         iteration += 1
         batch_features, batch_labels = next(graph_context_batch_iter(all_pairs, args.batch_size, side_info,
@@ -64,7 +66,7 @@ if __name__ == '__main__':
 
         if iteration % print_every_k_iterations == 0:
             end = time.time()
-            e = iteration*args.batch_size//len(all_pairs)
+            e = iteration * args.batch_size // len(all_pairs)
             print("Epoch {}/{}".format(e, args.epochs),
                   "Iteration: {}".format(iteration),
                   "Avg. Training loss: {:.4f}".format(loss / print_every_k_iterations),
@@ -76,7 +78,6 @@ if __name__ == '__main__':
     saver = tf.train.Saver()
     saver.save(sess, "checkpoints/EGES")
 
-
     feed_dict_test = {input_col: list(side_info[:, i]) for i, input_col in enumerate(EGES.inputs[:-1])}
     feed_dict_test[EGES.inputs[-1]] = np.zeros((len(side_info), 1), dtype=np.int32)
     embedding_result = sess.run(EGES.merge_emb, feed_dict=feed_dict_test)
@@ -85,5 +86,3 @@ if __name__ == '__main__':
 
     print('visualization...')
     plot_embeddings(embedding_result[:5000, :], side_info[:5000, :])
-
-
